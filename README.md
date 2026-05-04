@@ -66,22 +66,22 @@ Rotacionador-de-Triângulo/
 #### 🔹 `main.py`
 Arquivo principal que:
 - Solicita as coordenadas dos 3 vértices do triângulo
+- Valida se os pontos formam um triângulo não degenerado
 - Solicita o ângulo de rotação (em graus)
 - Aplica a transformação linear
 - Exibe os resultados numéricos
 - Gera o gráfico comparativo
 
 #### 🔹 `matematica_manual.py`
-Implementações matemáticas "do zero":
-- `criar_matriz_rotacao(angulo)` - Gera a matriz R(θ)
-- `multiplicar_matriz_vetor(matriz, vetor)` - Produto matriz × vetor
-- `multiplicar_matriz_matriz(matriz_a, matriz_b)` - Produto matriz × matriz
-- `calcular_determinante_2x2(matriz)` - Determinante 2×2
-- `calcular_determinante_3x3(matriz)` - Determinante 3×3 (Regra de Sarrus)
+Implementações matemáticas do zero, sem uso de NumPy:
+- `criar_matriz_rotacao(angulo)` — Gera a matriz R(θ) a partir de um ângulo em graus
+- `multiplicar_matriz_vetor(matriz, vetor)` — Produto matriz × vetor (aplica a rotação a um ponto)
+- `calcular_determinante_2x2(matriz)` — Calcula o determinante de uma matriz 2×2
+- `existe_triangulo(pontos)` — Verifica se os três vértices são não colineares (área ≠ 0)
 
 #### 🔹 `graficos.py`
 Visualização usando Matplotlib:
-- `plotar_comparacao(pontos_orig, pontos_rot)` - Plota triângulo original e rotacionado
+- `plotar_comparacao(pontos_orig, pontos_rot)` — Plota o triângulo original e o rotacionado no mesmo plano cartesiano
 
 ---
 
@@ -113,16 +113,9 @@ matplotlib
    pip install matplotlib
    ```
 
-   Ou, se tiver um arquivo `requirements.txt`:
-   ```bash
-   pip install -r requirements.txt
-   ```
-
 ---
 
 ## 🚀 Como Executar
-
-### Execução Básica
 
 1. Navegue até o diretório do projeto:
    ```bash
@@ -204,9 +197,19 @@ Resultado esperado: Triângulo retorna à posição original
 ### Por que Implementação Manual?
 
 Este projeto **não utiliza NumPy** intencionalmente para:
-1. **Fins didáticos** - Compreender os algoritmos por trás das operações
-2. **Transparência** - Cada operação é explícita e verificável
-3. **Aprendizado** - Consolidar conceitos de Álgebra Linear
+1. **Fins didáticos** — Compreender os algoritmos por trás das operações
+2. **Transparência** — Cada operação é explícita e verificável
+3. **Aprendizado** — Consolidar conceitos de Álgebra Linear na prática
+
+### Validação de Entrada
+
+Antes de aplicar a rotação, o programa verifica se os três vértices são **não colineares** usando a fórmula da área com coordenadas:
+
+```
+área_dobrada = x1(y2 - y3) + x2(y3 - y1) + x3(y1 - y2)
+```
+
+Se o resultado for zero (ou muito próximo de zero), os pontos são colineares e não formam um triângulo válido. O usuário é então solicitado a inserir novos valores.
 
 ### Arredondamento
 
@@ -217,39 +220,18 @@ return [round(resultado[0], 2), round(resultado[1], 2)]
 
 ### Ângulos
 
-- **Entrada:** Graus (mais intuitivo para usuários)
-- **Processamento:** Convertido para radianos internamente
-- **Conversão:** `math.radians(angulo)`
+- **Entrada:** Graus (mais intuitivo para o usuário)
+- **Processamento:** Convertido para radianos internamente via `math.radians(angulo)`
 
 ---
 
 ## 🎓 Conceitos de Álgebra Linear Aplicados
 
-1. **Transformações Lineares** - Mapeamento de R² → R²
-2. **Matrizes de Rotação** - Representação de rotações como operadores lineares
-3. **Produto Matriz-Vetor** - Aplicação de transformações a pontos
-4. **Determinante** - Fator de escala de áreas/volumes
-5. **Ortonormalidade** - Matrizes de rotação preservam ângulos e distâncias
-
----
-
-## 🛠️ Possíveis Extensões
-
-- [ ] Suporte a polígonos com mais de 3 vértices
-- [ ] Rotação em torno de um ponto arbitrário (não apenas a origem)
-- [ ] Implementar outras transformações (reflexão, cisalhamento, escala)
-- [ ] Animação da rotação
-- [ ] Interface gráfica (GUI) com Tkinter
-- [ ] Exportar coordenadas para arquivo
-- [ ] Composição de múltiplas transformações
-
----
-
-## 📚 Referências
-
-- Anton, H. & Rorres, C. - *Álgebra Linear com Aplicações*
-- Lay, D. C. - *Linear Algebra and Its Applications*
-- Strang, G. - *Introduction to Linear Algebra*
+1. **Transformações Lineares** — Mapeamento de R² → R²
+2. **Matrizes de Rotação** — Representação de rotações como operadores lineares
+3. **Produto Matriz-Vetor** — Aplicação de transformações a pontos
+4. **Determinante** — Fator de escala de áreas; det(R) = 1 confirma preservação de área
+5. **Ortonormalidade** — Matrizes de rotação preservam ângulos e distâncias
 
 ---
 
@@ -268,12 +250,6 @@ Este projeto é de código aberto e está disponível para fins educacionais.
 
 **Disciplina:** Álgebra Linear I  
 **Instituição:** Centro Universitário de Ensino Superior do Amazonas (CIESA)
-
----
-
-## 📞 Contato
-
-Para dúvidas ou sugestões sobre o projeto, entre em contato com os autores.
 
 ---
 
