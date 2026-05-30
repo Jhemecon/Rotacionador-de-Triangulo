@@ -1,50 +1,116 @@
 # 🔺 Rotacionador de Triângulo
 
-> Projeto de Álgebra Linear I - Transformações Lineares e Rotações em R²
+> Projeto de Álgebra Linear I — Transformações Lineares e Rotações em R²
 
-**Autores:** Jhemeson, Júlio, Dassayeff e João Pedro Duarte
+**Autores:** Jhemeson, Júlio, Dassayeff e João Pedro Duarte  
+**Disciplina:** Álgebra Linear I  
+**Instituição:** Centro Universitário de Ensino Superior do Amazonas (CIESA)
 
 ---
 
 ## 📋 Sobre o Projeto
 
-Este projeto implementa um **rotacionador de triângulos** utilizando conceitos de **Álgebra Linear**, especificamente transformações lineares através de matrizes de rotação. O programa permite ao usuário inserir as coordenadas de um triângulo no plano cartesiano e rotacioná-lo por um ângulo especificado, visualizando graficamente o resultado da transformação.
+Este projeto implementa um **rotacionador de triângulos** utilizando conceitos de **Álgebra Linear**, especificamente transformações lineares através de matrizes de rotação em R². O programa solicita as coordenadas dos três vértices de um triângulo no plano cartesiano e um ângulo de rotação, aplica a transformação ponto a ponto e exibe o resultado graficamente.
 
-### 🎯 Objetivos
-
-- Demonstrar a aplicação prática de **matrizes de rotação** em R²
-- Implementar operações matriciais **sem bibliotecas externas** (NumPy)
-- Visualizar transformações lineares geometricamente
-- Verificar a preservação de área através do **determinante**
+Toda a matemática é implementada **do zero, sem uso de NumPy**, a fim de tornar cada operação explícita e verificável.
 
 ---
 
-## 🧮 Conceitos Matemáticos
+## 🧮 Fundamentos Matemáticos
 
-### Matriz de Rotação
+### 1. Matriz de Rotação
 
-Para rotacionar um ponto (x, y) por um ângulo θ em torno da origem, utilizamos a matriz de rotação:
+Uma rotação de ângulo θ em torno da origem é representada pela matriz ortogonal:
 
 ```
 R(θ) = | cos(θ)  -sin(θ) |
        | sin(θ)   cos(θ) |
 ```
 
-### Transformação Linear
+No código (`matematica_manual.py`), o ângulo é recebido em graus e convertido para radianos antes de calcular as entradas da matriz:
 
-A rotação de um ponto é obtida pela multiplicação matriz-vetor:
+```python
+rad = math.radians(angulo)
+cos = math.cos(rad)
+sin = math.sin(rad)
+```
+
+### 2. Aplicação da Transformação (Produto Matriz × Vetor)
+
+Para rotacionar um ponto `P = [x, y]`, calcula-se o produto matriz-vetor:
 
 ```
 | x' |   | cos(θ)  -sin(θ) |   | x |
 | y' | = | sin(θ)   cos(θ) | × | y |
 ```
 
-### Determinante e Preservação de Área
-
-O **determinante da matriz de rotação é sempre 1**, o que significa que a transformação preserva áreas. Isso é verificado no programa:
+Explicitando as fórmulas escalares:
 
 ```
-det(R) = cos²(θ) + sin²(θ) = 1
+x' = cos(θ) · x  −  sin(θ) · y
+y' = sin(θ) · x  +  cos(θ) · y
+```
+
+Isso é exatamente o que `multiplicar_matriz_vetor` computa com seu duplo loop `i, j`:
+
+```python
+for i in range(2):
+    for j in range(2):
+        resultado[i] += matriz[i][j] * vetor[j]
+```
+
+A transformação é aplicada **individualmente a cada vértice** do triângulo dentro de `main.py`:
+
+```python
+for vetor_ponto in pontos:
+    novo_ponto = multiplicar_matriz_vetor(matriz_rotacao, vetor_ponto)
+    pontos_rotacionados.append(novo_ponto)
+```
+
+O resultado de cada vértice é arredondado para 2 casas decimais.
+
+### 3. Determinante e Preservação de Área
+
+O determinante de uma matriz 2×2
+
+```
+M = | a  b |      →    det(M) = a·d − b·c
+    | c  d |
+```
+
+é implementado diretamente em `calcular_determinante_2x2`. Para a matriz de rotação:
+
+```
+det(R) = cos(θ)·cos(θ) − (−sin(θ))·sin(θ)
+       = cos²(θ) + sin²(θ)
+       = 1
+```
+
+Isso confirma que **matrizes de rotação são isometrias**: preservam distâncias, ângulos e áreas. O programa exibe esse valor calculado numericamente (e arredondado para 2 casas) como verificação.
+
+> ⚠️ O determinante exibido é `round(det, 2)`. Para ângulos como 45° ou 30°, o valor exato já é 1; para outros ângulos podem surgir erros de ponto flutuante da ordem de 1e-16, que o arredondamento elimina.
+
+### 4. Verificação de Triângulo Não Degenerado
+
+Três pontos são colineares quando a área do triângulo que formariam é zero. A área com sinal é dada por metade do determinante da matriz de coordenadas homogêneas:
+
+```
+      | x1  y1  1 |
+  A = | x2  y2  1 |   ÷ 2
+      | x3  y3  1 |
+```
+
+Expandindo pela terceira coluna, obtém-se a expressão usada em `existe_triangulo`:
+
+```
+2A = x1·(y2 − y3) + x2·(y3 − y1) + x3·(y1 − y2)
+```
+
+Se `|2A| ≤ 1e-9`, os pontos são colineares e o programa rejeita a entrada:
+
+```python
+area_dobrada = x1 * (y2 - y3) + x2 * (y3 - y1) + x3 * (y1 - y2)
+return abs(area_dobrada) > 1e-9
 ```
 
 ---
@@ -54,80 +120,61 @@ det(R) = cos²(θ) + sin²(θ) = 1
 ```
 Rotacionador-de-Triângulo/
 │
-├── README.md                          # Este arquivo
-├── Rotacionador de Triângulo/
-│   ├── main.py                        # Programa principal
-│   ├── matematica_manual.py           # Operações matriciais
-│   └── graficos.py                    # Visualização gráfica
+├── README.md
+└── Rotacionador de Triângulo/       ← pasta com espaço no nome
+    ├── main.py                      # Ponto de entrada
+    ├── matematica_manual.py         # Operações matriciais sem NumPy
+    └── graficos.py                  # Visualização com Matplotlib
 ```
 
 ### Descrição dos Módulos
 
-#### 🔹 `main.py`
-Arquivo principal que:
-- Solicita as coordenadas dos 3 vértices do triângulo
-- Valida se os pontos formam um triângulo não degenerado
-- Solicita o ângulo de rotação (em graus)
-- Aplica a transformação linear
-- Exibe os resultados numéricos
-- Gera o gráfico comparativo
+#### `main.py`
+Orquestra o fluxo do programa:
+- Coleta as coordenadas dos 3 vértices via `input`, com tratamento de `ValueError`
+- Chama `existe_triangulo` em loop até receber pontos válidos
+- Solicita o ângulo de rotação em graus
+- Constrói a matriz de rotação e aplica a transformação a cada vértice
+- Exibe o determinante e as coordenadas originais/rotacionadas
+- Chama `plotar_comparacao` para gerar o gráfico
 
-#### 🔹 `matematica_manual.py`
-Implementações matemáticas do zero, sem uso de NumPy:
-- `criar_matriz_rotacao(angulo)` — Gera a matriz R(θ) a partir de um ângulo em graus
-- `multiplicar_matriz_vetor(matriz, vetor)` — Produto matriz × vetor (aplica a rotação a um ponto)
-- `calcular_determinante_2x2(matriz)` — Calcula o determinante de uma matriz 2×2
-- `existe_triangulo(pontos)` — Verifica se os três vértices são não colineares (área ≠ 0)
+#### `matematica_manual.py`
+Implementações matemáticas sem dependências externas:
 
-#### 🔹 `graficos.py`
-Visualização usando Matplotlib:
-- `plotar_comparacao(pontos_orig, pontos_rot)` — Plota o triângulo original e o rotacionado no mesmo plano cartesiano
+| Função | O que faz |
+|---|---|
+| `criar_matriz_rotacao(angulo)` | Converte graus → radianos e monta R(θ) como lista de listas |
+| `multiplicar_matriz_vetor(matriz, vetor)` | Produto M·v com duplo loop; retorna resultado arredondado a 2 casas |
+| `calcular_determinante_2x2(matriz)` | Calcula `a·d − b·c`; retorna arredondado a 2 casas |
+| `existe_triangulo(pontos)` | Testa colinearidade pela área com sinal; retorna `bool` |
+
+#### `graficos.py`
+Visualização com Matplotlib:
+- Fecha cada triângulo adicionando o primeiro vértice ao final da lista
+- Plota original em **azul** (marcador `o`) e rotacionado em **vermelho** (marcador `s`)
+- Usa `plt.axis('equal')` para manter proporção correta dos eixos
 
 ---
 
-## ⚙️ Instalação e Requisitos
-
-### Pré-requisitos
+## ⚙️ Requisitos e Instalação
 
 - Python 3.7 ou superior
-- pip (gerenciador de pacotes Python)
-
-### Dependências
-
-O projeto utiliza apenas uma biblioteca externa:
+- Matplotlib (única dependência externa)
 
 ```bash
-matplotlib
+pip install matplotlib
 ```
-
-### Instalação
-
-1. **Clone o repositório:**
-   ```bash
-   git clone https://github.com/seu-usuario/Rotacionador-de-Triangulo.git
-   cd Rotacionador-de-Triangulo
-   ```
-
-2. **Instale as dependências:**
-   ```bash
-   pip install matplotlib
-   ```
 
 ---
 
 ## 🚀 Como Executar
 
-1. Navegue até o diretório do projeto:
-   ```bash
-   cd "Rotacionador de Triângulo"
-   ```
+```bash
+cd "Rotacionador de Triângulo"
+python main.py
+```
 
-2. Execute o programa principal:
-   ```bash
-   python main.py
-   ```
-
-### Exemplo de Uso
+### Exemplo de Sessão
 
 ```
 --- ROTACIONADOR DE TRIÂNGULO ---
@@ -157,104 +204,30 @@ Coordenadas após rotação de 45.0°:
 Gerando gráfico comparativo...
 ```
 
-### Resultado Visual
-
-O programa gera um gráfico mostrando:
-- **Triângulo azul (original)** com marcadores circulares
-- **Triângulo vermelho (rotacionado)** com marcadores quadrados
-- Grade cartesiana para referência
-- Eixos X e Y centralizados
-
 ---
 
-## 💡 Casos de Teste Sugeridos
+## 💡 Casos de Teste
 
-### Teste 1: Rotação de 90°
-```
-Vértices: (0,0), (1,0), (0,1)
-Ângulo: 90°
-Resultado esperado: Triângulo rotacionado no sentido anti-horário
-```
-
-### Teste 2: Rotação de 180°
-```
-Vértices: (1,1), (3,1), (2,3)
-Ângulo: 180°
-Resultado esperado: Triângulo invertido em relação à origem
-```
-
-### Teste 3: Rotação de 360°
-```
-Vértices: Quaisquer
-Ângulo: 360°
-Resultado esperado: Triângulo retorna à posição original
-```
-
----
-
-## 🔬 Detalhes de Implementação
-
-### Por que Implementação Manual?
-
-Este projeto **não utiliza NumPy** intencionalmente para:
-1. **Fins didáticos** — Compreender os algoritmos por trás das operações
-2. **Transparência** — Cada operação é explícita e verificável
-3. **Aprendizado** — Consolidar conceitos de Álgebra Linear na prática
-
-### Validação de Entrada
-
-Antes de aplicar a rotação, o programa verifica se os três vértices são **não colineares** usando a fórmula da área com coordenadas:
-
-```
-área_dobrada = x1(y2 - y3) + x2(y3 - y1) + x3(y1 - y2)
-```
-
-Se o resultado for zero (ou muito próximo de zero), os pontos são colineares e não formam um triângulo válido. O usuário é então solicitado a inserir novos valores.
-
-### Arredondamento
-
-Os resultados são arredondados para 2 casas decimais para melhor legibilidade:
-```python
-return [round(resultado[0], 2), round(resultado[1], 2)]
-```
-
-### Ângulos
-
-- **Entrada:** Graus (mais intuitivo para o usuário)
-- **Processamento:** Convertido para radianos internamente via `math.radians(angulo)`
+| Teste | Vértices | Ângulo | Resultado esperado |
+|---|---|---|---|
+| Rotação 90° | (0,0), (1,0), (0,1) | 90° | Triângulo girado 90° anti-horário |
+| Rotação 180° | (1,1), (3,1), (2,3) | 180° | Triângulo espelhado em relação à origem |
+| Rotação 360° | Quaisquer | 360° | Coordenadas idênticas às originais (dentro da precisão de 2 casas) |
+| Colinearidade | (0,0), (1,1), (2,2) | — | Programa rejeita e pede novos pontos |
 
 ---
 
 ## 🎓 Conceitos de Álgebra Linear Aplicados
 
-1. **Transformações Lineares** — Mapeamento de R² → R²
-2. **Matrizes de Rotação** — Representação de rotações como operadores lineares
-3. **Produto Matriz-Vetor** — Aplicação de transformações a pontos
-4. **Determinante** — Fator de escala de áreas; det(R) = 1 confirma preservação de área
-5. **Ortonormalidade** — Matrizes de rotação preservam ângulos e distâncias
+1. **Transformação Linear** — Mapeamento T: R² → R² que preserva adição e multiplicação escalar
+2. **Matriz de Rotação** — Representação matricial de uma rotação; pertence ao grupo SO(2)
+3. **Produto Matriz-Vetor** — Mecanismo de aplicação de T a cada vértice
+4. **Determinante** — Fator de escala de área; `det(R) = 1` confirma que R é isometria
+5. **Colinearidade e Área com Sinal** — Uso do determinante de coordenadas homogêneas para validar a entrada
+6. **Ortonormalidade** — As colunas de R(θ) formam base ortonormal; daí a preservação de normas e ângulos
 
 ---
 
 ## 📄 Licença
 
-Este projeto é de código aberto e está disponível para fins educacionais.
-
----
-
-## 👥 Contribuidores
-
-- **Jhemeson**
-- **Júlio**
-- **Dassayeff**
-- **João Pedro Duarte**
-
-**Disciplina:** Álgebra Linear I  
-**Instituição:** Centro Universitário de Ensino Superior do Amazonas (CIESA)
-
----
-
-<div align="center">
-
-**⭐ Se este projeto foi útil, considere dar uma estrela no repositório!**
-
-</div>
+Projeto de código aberto disponível para fins educacionais.
